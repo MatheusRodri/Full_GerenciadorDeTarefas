@@ -1,9 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+
 
 const connectToDatabase = async () => {
-    await mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:<${process.env.DB_PASSWORD}>@tasksmanagercluster.zft3m.mongodb.net/?retryWrites=true&w=majority&appName=TasksManagerCluster`, () => {
-        console.log('Connected to mongoDB');
-    })
-}
+    try {
+        (
+            await mongoose.connect(process.env.DB_URL)).isObjectIdOrHexString(
+                console.log("MongoDB conectado com sucesso!"));
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
 
 module.exports = connectToDatabase;
