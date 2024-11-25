@@ -51,6 +51,36 @@ app.post('/tasks', async (req, res) => {
     }
 })
 
+app.patch('/tasks/:id', async (req, res) => {
+    try {
+        const taskId = req.params.id
+        const taskData = req.body
+
+        const taskToUpdate = await TaskModel.findById(taskId)
+
+        const allowedUpdates = ['isCompleted']
+        const requestedUpdates = Object.keys(taskData)
+
+        for (update of requestedUpdates) {
+            if (allowedUpdates.includes(update)) {
+                taskToUpdate[update] = taskData[update]
+            } else {
+                return res.status(400).send('One or more fields are not allowed to be updated')
+            }
+        }
+
+        await taskToUpdate.save()
+
+        return res.status(200).send(taskToUpdate)
+
+
+
+
+    } catch (e) {
+        res.status(500).send(e.message)
+    }
+})
+
 app.delete('/tasks/:id', async (req, res) => {
     try {
         const taskId = req.params.id
