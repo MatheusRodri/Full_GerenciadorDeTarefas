@@ -1,6 +1,8 @@
 
 const TaskModel = require('../models/task.model');
-const { notFoundErrors } = require("../errors/mongodb.errors");
+const { notFoundErrors, objectIdError } = require("../errors/mongodb.errors");
+const {notAllowedFieldsToUpdateError } = require("../errors/general.errors");
+const mongoose = require("mongoose");
 
 class TaskController {
     constructor(req, res) {
@@ -32,7 +34,10 @@ class TaskController {
             return this.res.status(200).send(task)
 
         } catch (e) {
-            this.res.status(500).send(e.message);
+            if( e instanceof mongoose.Error.CastError){
+                return objectIdError(this.res)
+            }
+            return this.res.status(500).send(e.message);
         }
     }
 
@@ -66,7 +71,7 @@ class TaskController {
                 if (allowedUpdates.includes(update)) {
                     taskToUpdate[update] = taskData[update]
                 } else {
-                    return this.res.status(500).send('One or more fields are not allowed to be updated')
+                    return  notAllowedFieldsToUpdateError(this.res)
                 }
             }
 
@@ -78,6 +83,9 @@ class TaskController {
 
 
         } catch (e) {
+            if( e instanceof mongoose.Error.CastError){
+                return objectIdError(this.res)
+            }
             this.res.status(500).send(e.message)
         }
     }
@@ -96,6 +104,9 @@ class TaskController {
 
             this.res.status(200).send(deletedTask)
         } catch (e) {
+            if( e instanceof mongoose.Error.CastError){
+                return objectIdError(this.res)
+            }
             this.res.status(500).send(e.message)
         }
     }
