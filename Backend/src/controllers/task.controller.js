@@ -1,5 +1,6 @@
 
 const TaskModel = require('../models/task.model');
+const { notFoundErrors } = require("../errors/mongodb.errors");
 
 class TaskController {
     constructor(req, res) {
@@ -22,9 +23,11 @@ class TaskController {
 
             const task = await TaskModel.findById(taskId);
 
-            if (!task) {
-                return this.res.status(404).send('Task not found')
+            if(!task) {
+                return  notFoundErrors(this.res);
             }
+
+
 
             return this.res.status(200).send(task)
 
@@ -55,11 +58,15 @@ class TaskController {
             const allowedUpdates = ['isCompleted']
             const requestedUpdates = Object.keys(taskData)
 
+            if(!taskToUpdate){
+                return  notFoundErrors(this.res);
+            }
+
             for (let update of requestedUpdates) {
                 if (allowedUpdates.includes(update)) {
                     taskToUpdate[update] = taskData[update]
                 } else {
-                    return this.res.status(400).send('One or more fields are not allowed to be updated')
+                    return this.res.status(500).send('One or more fields are not allowed to be updated')
                 }
             }
 
@@ -82,7 +89,7 @@ class TaskController {
             const taskToDelete = await TaskModel.findById(taskId)
 
             if (!taskToDelete) {
-                return this.res.status(404).send('Task not found')
+                return  notFoundErrors(this.res);
             }
 
             const deletedTask = await TaskModel.findByIdAndDelete(taskId)
